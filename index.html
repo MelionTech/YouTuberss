@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Youtuberss</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f4;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin: -5px 0;
+            font-weight: bold;
+            line-height: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(to bottom, #07BEEA 50%, #FFFFFF 50%);
+            color: white;
+            padding: 10px;
+            width: 100vw;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        h1 span {
+            text-align: center;
+            color: black;
+            width: 100%;
+            transform: translateX(50px);
+        }
+
+        .circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: red;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 150px;
+            color: white;
+            font-size: 36px;
+            z-index: 1;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            box-sizing: border-box;
+            margin-top: 180px;
+            position: relative;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid #07BEEA;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus {
+            border-color: red;
+            outline: none;
+            box-shadow: 0 0 5px rgba(7, 190, 234, 0.5);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #05A1C1;
+            transform: translateY(-2px);
+        }
+
+        .social-icons {
+            margin-top: 20px;
+            text-align: center;
+            position: absolute;
+            bottom: 70px;
+            width: 100%;
+            transition: opacity 0.3s;
+        }
+
+        .social-icons a {
+            margin: 0 1px;
+            font-size: 24px;
+            text-decoration: none;
+        }
+
+        .social-icons a.youtube {
+            color: #FF0000;
+        }
+
+        .social-icons a.telegram {
+            color: #0088CC;
+        }
+
+        .buy-coffee {
+            display: block;
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            transition: opacity 0.3s;
+        }
+
+        .buy-coffee img {
+            max-width: 150px;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <h1>Melion<span>Tech</span></h1>
+    <div class="circle">
+        <i class="fab fa-youtube"></i>
+    </div>
+    <div class="container">
+        <h2>YouTube To RSS</h2>
+        <input type="text" id="YoutubeUrl" placeholder=" أدخل رابط حساب أو قائمة">
+        <button id="checkButton">تحقق</button>
+    </div>
+    <div class="social-icons">
+        <a href="https://www.youtube.com/@meliontech" target="_blank" class="youtube">
+            <i class="fab fa-youtube"></i>
+        </a>
+        <a href="https://t.me/meliontech" target="_blank" class="telegram">
+            <i class="fab fa-telegram"></i>
+        </a>
+    </div>
+    <a href="https://ko-fi.com/meliontech/" target="_blank" class="buy-coffee">
+        <img src="https://i.imgur.com/N40uXXP_d.webp?maxwidth=760&fidelity=grand" alt="Buy me a coffee">
+    </a>
+
+ <script>
+    document.getElementById('checkButton').addEventListener('click', function() {
+        const button = this;
+        let originalUrl = document.getElementById('YoutubeUrl').value.trim();
+
+        button.textContent = 'جار التحقق...';
+        button.disabled = true;
+
+        // التعبيرات الشرطية لاكتشاف أنواع الروابط المختلفة
+        const playlistMatch = originalUrl.match(/(?:https?:\/\/)?(?:www\.)?(?:m\.)?youtube\.com\/playlist\?list=([^&]+)/);
+        const channelMatch = originalUrl.match(/(?:https?:\/\/)?(?:www\.)?(?:m\.)?youtube\.com\/channel\/([^&]+)/);
+        const usernameMatch = originalUrl.match(/(?:https?:\/\/)?(?:www\.)?(?:m\.)?youtube\.com\/@([^/?]+)/);
+
+        let modifiedUrl, apiUrl;
+
+        // قائمة مفاتيح API
+        const apiKeys = [
+            'AIzaSyCX5YLmDnoXIUZ2Drg6YLORjakQxOf2THM',
+            
+            'AIzaSyAQ-q67Bk1HSMHKC5Q9Tm-8nVclj_UZqgw',
+            'AIzaSyCtU911Agau3RBE5u6UXftk_Lewq7e64f0',
+            'AIzaSyALAPgT21IIwm3SwbiQJrZM1x_gzT8197I',
+            'AIzaSyA59v2vbKMD92ZDmeDslouHivaVJOq8r48',
+            
+            'AIzaSyB8wOTSN8isVTJ-x6t05VGp1aYmRc0rG30',
+            'AIzaSyDYtzBNXhmHoNDasCjWJrSd-gGrsxCioAM',
+            'AIzaSyDIwE0zmKg4JmEsst2RIK6xbANtAxj4USk',
+            'AIzaSyBh6AlWl1TKZlGwSNlmqTJ3b_1eRAZ5nLs',
+            
+            'AIzaSyDfcPQCx27BRycQnk0y-aHwhJJAXtBgr4g',
+            
+          'AIzaSyDA7JDxlB_jAmY7Qj9HqJb5AZi4tHw1_xU',
+         
+          'AIzaSyCYtLq3jQPyOfqVzqmvPVS9FgZ1WQzO7DQ'
+        ];
+        
+        let apiKeyIndex = 0; // مؤشر مفتاح API الحالي
+
+        function useNextApiKey() {
+            apiKeyIndex = (apiKeyIndex + 1) % apiKeys.length; // الانتقال إلى المفتاح التالي
+            return apiKeys[apiKeyIndex];
+        }
+
+        if (playlistMatch) {
+            const playlistId = playlistMatch[1];
+            modifiedUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`;
+            apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(modifiedUrl)}`;
+            fetchRssData(apiUrl, modifiedUrl);
+        } else if (channelMatch) {
+            const channelId = channelMatch[1];
+            modifiedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+            apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(modifiedUrl)}`;
+            fetchRssData(apiUrl, modifiedUrl);
+        } else if (usernameMatch) {
+            const username = usernameMatch[1];
+            const userApiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${username}&type=channel&key=${apiKeys[apiKeyIndex]}`;
+
+            fetchUserApiData(userApiUrl, username);
+        } else {
+            showError('يرجى إدخال رابط يوتيوب صالح لقائمة التشغيل أو القناة.');
+            button.textContent = 'تحقق';
+            button.disabled = false;
+        }
+
+        // دالة لجلب بيانات API للمستخدم
+        function fetchUserApiData(userApiUrl, username) {
+            fetch(userApiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.items && data.items.length > 0) {
+                        const channelId = data.items[0].id.channelId; // استخدم channelId هنا
+                        const channelTitle = data.items[0].snippet.title; // اسم القناة
+                        const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`; // رابط الخلاصة
+
+                        // عرض المعلومات باستخدام SweetAlert
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'نجاح',
+                            html: `
+                                <div style="background-color: red; color: white; padding: 10px; border-radius: 5px; display: flex; align-items: center;">
+                                    <i class="fab fa-youtube" style="margin-left: 10px; margin-right: 10px; font-size: 24px;"></i>
+                                    ${channelTitle}
+                                </div>
+                                <br>
+                                <strong>رابط الخلاصة:</strong> <a href="${feedUrl}" target="_blank">${feedUrl}</a><br>
+                                <button id="copyFeedButton" class="swal2-confirm swal2-styled" style="background-color: orange; color: white; border: none; width: 150px; padding: 7px 1px; border-radius: 5px;">
+                                    <i class="fas fa-rss" style="margin-right: 5px; color: white;"></i> نسخ الرابط
+                                </button>
+                            `,
+                            didOpen: () => {
+                                const copyButton = document.getElementById('copyFeedButton');
+                                copyButton.addEventListener('click', () => {
+                                    navigator.clipboard.writeText(feedUrl).then(() => {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'تم النسخ!',
+                                            text: 'تم نسخ رابط الخلاصة إلى الحافظة.'
+                                        });
+                                    }).catch(err => {
+                                        showError('حدث خطأ أثناء النسخ: ' + err.message);
+                                    });
+                                });
+                            }
+                        });
+                    } else {
+                        showError(`لم يتم العثور على القناة لهذا المستخدم: ${username}. تأكد من كتابة اسم المستخدم بشكل صحيح.`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    if (apiKeyIndex < apiKeys.length - 1) {
+                        // إذا كان هناك مفاتيح أخرى متاحة، استخدم المفتاح التالي
+                        const nextApiKey = useNextApiKey();
+                        fetchUserApiData(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${username}&type=channel&key=${nextApiKey}`, username);
+                    } else {
+                        showError(`جميع مفاتيح API فشلت. حاول لاحقًا.`);
+                        button.textContent = 'تحقق';
+                        button.disabled = false;
+                    }
+                })
+                .finally(() => {
+                    button.textContent = 'تحقق';
+                    button.disabled = false;
+                });
+        }
+
+        // دالة لجلب بيانات RSS والتحقق منها
+        function fetchRssData(apiUrl, modifiedUrl) {
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    button.textContent = 'تحقق';
+                    button.disabled = false;
+
+                    if (data.status !== 'ok') {
+                        showError('رابط غير صالح: ' + modifiedUrl);
+                    } else {
+                        const title = data.feed.title || 'لا يوجد عنوان';
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'نجاح',
+                            html: `
+                                <div style="background-color: red; color: white; padding: 10px; border-radius: 5px; display: flex; align-items: center;">
+                                    <i class="fab fa-youtube" style="margin-left: 10px; margin-right: 10px; font-size: 24px;"></i>
+                                    ${title}
+                                </div>
+                                <br>
+                                <strong>رابط الخلاصة:</strong> <a href="${modifiedUrl}" target="_blank">${modifiedUrl}</a><br>
+                                <button id="copyFeedButton" class="swal2-confirm swal2-styled" style="background-color: orange; color: white; border: none; width: 150px; padding: 7px 1px; border-radius: 5px;">
+                                    <i class="fas fa-rss" style="margin-right: 5px; color: white;"></i> نسخ الرابط
+                                </button>
+                            `,
+                            didOpen: () => {
+                                const copyButton = document.getElementById('copyFeedButton');
+                                copyButton.addEventListener('click', () => {
+                                    navigator.clipboard.writeText(modifiedUrl).then(() => {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'تم النسخ!',
+                                            text: 'تم نسخ رابط الخلاصة إلى الحافظة.'
+                                        });
+                                    }).catch(err => {
+                                        showError('حدث خطأ أثناء النسخ: ' + err.message);
+                                    });
+                                });
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    showError('حدث خطأ: ' + error.message);
+                    button.textContent = 'تحقق';
+                    button.disabled = false;
+                });
+        }
+
+        // دالة لعرض رسالة الخطأ
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: message
+            });
+        }
+    });
+
+
+
+
+
+
+        let lastHeight = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            if (window.innerHeight < lastHeight) {
+                document.querySelector('.social-icons').classList.add('hidden');
+                document.querySelector('.buy-coffee').classList.add('hidden');
+            } else {
+                document.querySelector('.social-icons').classList.remove('hidden');
+                document.querySelector('.buy-coffee').classList.remove('hidden');
+            }
+            lastHeight = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
