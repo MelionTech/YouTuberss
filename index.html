@@ -176,206 +176,196 @@
         <img src="https://i.imgur.com/N40uXXP_d.webp?maxwidth=760&fidelity=grand" alt="Buy me a coffee">
     </a>
 
- <script>
-    document.getElementById('checkButton').addEventListener('click', function() {
-        const button = this;
-        let originalUrl = document.getElementById('YoutubeUrl').value.trim();
+    <script>
+        document.getElementById('checkButton').addEventListener('click', function() {
+            const button = this;
+            let originalUrl = document.getElementById('YoutubeUrl').value.trim();
 
-        button.textContent = 'جار التحقق...';
-        button.disabled = true;
+            button.textContent = 'جار التحقق...';
+            button.disabled = true;
 
-        // التعبيرات الشرطية لاكتشاف أنواع الروابط المختلفة
-        const playlistMatch = originalUrl.match(/(?:https?:\/\/)?(?:www\.)?(?:m\.)?youtube\.com\/playlist\?list=([^&]+)/);
-        const channelMatch = originalUrl.match(/(?:https?:\/\/)?(?:www\.)?(?:m\.)?youtube\.com\/channel\/([^&]+)/);
-        const usernameMatch = originalUrl.match(/(?:https?:\/\/)?(?:www\.)?(?:m\.)?youtube\.com\/@([^/?]+)/);
+            // التعبيرات الشرطية لاكتشاف أنواع الروابط المختلفة
+            const playlistMatch = originalUrl.match(/(?:https?:\/\/)?(?:www\.)?(?:m\.)?youtube\.com\/playlist\?list=([^&]+)/);
+            const channelMatch = originalUrl.match(/(?:https?:\/\/)?(?:www\.)?(?:m\.)?youtube\.com\/channel\/([A-Za-z0-9_-]{24})|([A-Za-z0-9_-]{24})/); // تحديث هنا
+            const usernameMatch = originalUrl.match(/(?:https?:\/\/)?(?:www\.)?(?:m\.)?youtube\.com\/@([^/?]+)/);
 
-        let modifiedUrl, apiUrl;
+            let modifiedUrl, apiUrl;
 
-        // قائمة مفاتيح API
-        const apiKeys = [
-            'AIzaSyCX5YLmDnoXIUZ2Drg6YLORjakQxOf2THM',
+            // قائمة مفاتيح API
+            const apiKeys = [
+                'AIzaSyCX5YLmDnoXIUZ2Drg6YLORjakQxOf2THM',
+                'AIzaSyAQ-q67Bk1HSMHKC5Q9Tm-8nVclj_UZqgw',
+                'AIzaSyCtU911Agau3RBE5u6UXftk_Lewq7e64f0',
+                'AIzaSyALAPgT21IIwm3SwbiQJrZM1x_gzT8197I',
+                'AIzaSyA59v2vbKMD92ZDmeDslouHivaVJOq8r48',
+                'AIzaSyB8wOTSN8isVTJ-x6t05VGp1aYmRc0rG30',
+                'AIzaSyDYtzBNXhmHoNDasCjWJrSd-gGrsxCioAM',
+                'AIzaSyDIwE0zmKg4JmEsst2RIK6xbANtAxj4USk',
+                'AIzaSyBh6AlWl1TKZlGwSNlmqTJ3b_1eRAZ5nLs',
+                'AIzaSyDfcPQCx27BRycQnk0y-aHwhJJAXtBgr4g',
+                'AIzaSyDA7JDxlB_jAmY7Qj9HqJb5AZi4tHw1_xU',
+                'AIzaSyCYtLq3jQPyOfqVzqmvPVS9FgZ1WQzO7DQ'
+            ];
             
-            'AIzaSyAQ-q67Bk1HSMHKC5Q9Tm-8nVclj_UZqgw',
-            'AIzaSyCtU911Agau3RBE5u6UXftk_Lewq7e64f0',
-            'AIzaSyALAPgT21IIwm3SwbiQJrZM1x_gzT8197I',
-            'AIzaSyA59v2vbKMD92ZDmeDslouHivaVJOq8r48',
-            
-            'AIzaSyB8wOTSN8isVTJ-x6t05VGp1aYmRc0rG30',
-            'AIzaSyDYtzBNXhmHoNDasCjWJrSd-gGrsxCioAM',
-            'AIzaSyDIwE0zmKg4JmEsst2RIK6xbANtAxj4USk',
-            'AIzaSyBh6AlWl1TKZlGwSNlmqTJ3b_1eRAZ5nLs',
-            
-            'AIzaSyDfcPQCx27BRycQnk0y-aHwhJJAXtBgr4g',
-            
-          'AIzaSyDA7JDxlB_jAmY7Qj9HqJb5AZi4tHw1_xU',
-         
-          'AIzaSyCYtLq3jQPyOfqVzqmvPVS9FgZ1WQzO7DQ'
-        ];
-        
-        let apiKeyIndex = 0; // مؤشر مفتاح API الحالي
+            let apiKeyIndex = 0; // مؤشر مفتاح API الحالي
 
-        function useNextApiKey() {
-            apiKeyIndex = (apiKeyIndex + 1) % apiKeys.length; // الانتقال إلى المفتاح التالي
-            return apiKeys[apiKeyIndex];
-        }
+            function useNextApiKey() {
+                apiKeyIndex = (apiKeyIndex + 1) % apiKeys.length; // الانتقال إلى المفتاح التالي
+                return apiKeys[apiKeyIndex];
+            }
 
-        if (playlistMatch) {
-            const playlistId = playlistMatch[1];
-            modifiedUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`;
-            apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(modifiedUrl)}`;
-            fetchRssData(apiUrl, modifiedUrl);
-        } else if (channelMatch) {
-            const channelId = channelMatch[1];
-            modifiedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
-            apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(modifiedUrl)}`;
-            fetchRssData(apiUrl, modifiedUrl);
-        } else if (usernameMatch) {
-            const username = usernameMatch[1];
-            const userApiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${username}&type=channel&key=${apiKeys[apiKeyIndex]}`;
+            if (playlistMatch) {
+                const playlistId = playlistMatch[1];
+                modifiedUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`;
+                apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(modifiedUrl)}`;
+                fetchRssData(apiUrl, modifiedUrl);
+            } else if (channelMatch) {
+                const channelId = channelMatch[1] || channelMatch[2]; // استخدم المعرف من المجموعة الأولى أو الثانية
+                modifiedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+                apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(modifiedUrl)}`;
+                fetchRssData(apiUrl, modifiedUrl);
+            } else if (usernameMatch) {
+                const username = usernameMatch[1];
+                const userApiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${username}&type=channel&key=${apiKeys[apiKeyIndex]}`;
 
-            fetchUserApiData(userApiUrl, username);
-        } else {
-            showError('يرجى إدخال رابط يوتيوب صالح لقائمة التشغيل أو القناة.');
-            button.textContent = 'تحقق';
-            button.disabled = false;
-        }
+                fetchUserApiData(userApiUrl, username);
+            } else {
+                showError('يرجى إدخال رابط يوتيوب صالح لقائمة التشغيل أو القناة.');
+                button.textContent = 'تحقق';
+                button.disabled = false;
+            }
 
-        // دالة لجلب بيانات API للمستخدم
-        function fetchUserApiData(userApiUrl, username) {
-            fetch(userApiUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.items && data.items.length > 0) {
-                        const channelId = data.items[0].id.channelId; // استخدم channelId هنا
-                        const channelTitle = data.items[0].snippet.title; // اسم القناة
-                        const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`; // رابط الخلاصة
+            // دالة لجلب بيانات API للمستخدم
+            function fetchUserApiData(userApiUrl, username) {
+                fetch(userApiUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.items && data.items.length > 0) {
+                            const channelId = data.items[0].id.channelId; // استخدم channelId هنا
+                            const channelTitle = data.items[0].snippet.title; // اسم القناة
+                            const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`; // رابط الخلاصة
 
-                        // عرض المعلومات باستخدام SweetAlert
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'نجاح',
-                            html: `
-                                <div style="background-color: red; color: white; padding: 10px; border-radius: 5px; display: flex; align-items: center;">
-                                    <i class="fab fa-youtube" style="margin-left: 10px; margin-right: 10px; font-size: 24px;"></i>
-                                    ${channelTitle}
-                                </div>
-                                <br>
-                                <strong>رابط الخلاصة:</strong> <a href="${feedUrl}" target="_blank">${feedUrl}</a><br>
-                                <button id="copyFeedButton" class="swal2-confirm swal2-styled" style="background-color: orange; color: white; border: none; width: 150px; padding: 7px 1px; border-radius: 5px;">
-                                    <i class="fas fa-rss" style="margin-right: 5px; color: white;"></i> نسخ الرابط
-                                </button>
-                            `,
-                            didOpen: () => {
-                                const copyButton = document.getElementById('copyFeedButton');
-                                copyButton.addEventListener('click', () => {
-                                    navigator.clipboard.writeText(feedUrl).then(() => {
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: 'تم النسخ!',
-                                            text: 'تم نسخ رابط الخلاصة إلى الحافظة.'
+                            // عرض المعلومات باستخدام SweetAlert
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'نجاح',
+                                html: `
+                                    <div style="background-color: red; color: white; padding: 10px; border-radius: 5px; display: flex; align-items: center;">
+                                        <i class="fab fa-youtube" style="margin-left: 10px; margin-right: 10px; font-size: 24px;"></i>
+                                        ${channelTitle}
+                                    </div>
+                                    <br>
+                                    <strong>رابط الخلاصة:</strong> <a href="${feedUrl}" target="_blank">${feedUrl}</a><br>
+                                    <button id="copyFeedButton" class="swal2-confirm swal2-styled" style="background-color: orange; color: white; border: none; width: 150px; padding: 7px 1px; border-radius: 5px;">
+                                        <i class="fas fa-rss" style="margin-right: 5px; color: white;"></i> نسخ الرابط
+                                    </button>
+                                `,
+                                didOpen: () => {
+                                    const copyButton = document.getElementById('copyFeedButton');
+                                    copyButton.addEventListener('click', () => {
+                                        navigator.clipboard.writeText(feedUrl).then(() => {
+                                            Swal.fire({
+                                                icon: 'success',
+                                                title: 'تم النسخ!',
+                                                text: 'تم نسخ رابط الخلاصة إلى الحافظة.'
+                                            });
+                                        }).catch(err => {
+                                            showError('حدث خطأ أثناء النسخ: ' + err.message);
                                         });
-                                    }).catch(err => {
-                                        showError('حدث خطأ أثناء النسخ: ' + err.message);
                                     });
-                                });
-                            }
-                        });
-                    } else {
-                        showError(`لم يتم العثور على القناة لهذا المستخدم: ${username}. تأكد من كتابة اسم المستخدم بشكل صحيح.`);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    if (apiKeyIndex < apiKeys.length - 1) {
-                        // إذا كان هناك مفاتيح أخرى متاحة، استخدم المفتاح التالي
-                        const nextApiKey = useNextApiKey();
-                        fetchUserApiData(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${username}&type=channel&key=${nextApiKey}`, username);
-                    } else {
-                        showError(`جميع مفاتيح API فشلت. حاول لاحقًا.`);
+                                }
+                            });
+                        } else {
+                            showError(`لم يتم العثور على القناة لهذا المستخدم: ${username}. تأكد من كتابة اسم المستخدم بشكل صحيح.`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        if (apiKeyIndex < apiKeys.length - 1) {
+                            // إذا كان هناك مفاتيح أخرى متاحة، استخدم المفتاح التالي
+                            const nextApiKey = useNextApiKey();
+                            fetchUserApiData(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${username}&type=channel&key=${nextApiKey}`, username);
+                        } else {
+                            showError(`جميع مفاتيح API فشلت. حاول لاحقًا.`);
+                            button.textContent = 'تحقق';
+                            button.disabled = false;
+                        }
+                    })
+                    .finally(() => {
                         button.textContent = 'تحقق';
                         button.disabled = false;
-                    }
-                })
-                .finally(() => {
-                    button.textContent = 'تحقق';
-                    button.disabled = false;
-                });
-        }
+                    });
+            }
 
-        // دالة لجلب بيانات RSS والتحقق منها
-        function fetchRssData(apiUrl, modifiedUrl) {
-            fetch(apiUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    button.textContent = 'تحقق';
-                    button.disabled = false;
+            // دالة لجلب بيانات RSS والتحقق منها
+            function fetchRssData(apiUrl, modifiedUrl) {
+                fetch(apiUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        button.textContent = 'تحقق';
+                        button.disabled = false;
 
-                    if (data.status !== 'ok') {
-                        showError('رابط غير صالح: ' + modifiedUrl);
-                    } else {
-                        const title = data.feed.title || 'لا يوجد عنوان';
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'نجاح',
-                            html: `
-                                <div style="background-color: red; color: white; padding: 10px; border-radius: 5px; display: flex; align-items: center;">
-                                    <i class="fab fa-youtube" style="margin-left: 10px; margin-right: 10px; font-size: 24px;"></i>
-                                    ${title}
-                                </div>
-                                <br>
-                                <strong>رابط الخلاصة:</strong> <a href="${modifiedUrl}" target="_blank">${modifiedUrl}</a><br>
-                                <button id="copyFeedButton" class="swal2-confirm swal2-styled" style="background-color: orange; color: white; border: none; width: 150px; padding: 7px 1px; border-radius: 5px;">
-                                    <i class="fas fa-rss" style="margin-right: 5px; color: white;"></i> نسخ الرابط
-                                </button>
-                            `,
-                            didOpen: () => {
-                                const copyButton = document.getElementById('copyFeedButton');
-                                copyButton.addEventListener('click', () => {
-                                    navigator.clipboard.writeText(modifiedUrl).then(() => {
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: 'تم النسخ!',
-                                            text: 'تم نسخ رابط الخلاصة إلى الحافظة.'
+                        if (data.status !== 'ok') {
+                            showError('رابط غير صالح: ' + modifiedUrl);
+                        } else {
+                            const title = data.feed.title || 'لا يوجد عنوان';
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'نجاح',
+                                html: `
+                                    <div style="background-color: red; color: white; padding: 10px; border-radius: 5px; display: flex; align-items: center;">
+                                        <i class="fab fa-youtube" style="margin-left: 10px; margin-right: 10px; font-size: 24px;"></i>
+                                        ${title}
+                                    </div>
+                                    <br>
+                                    <strong>رابط الخلاصة:</strong> <a href="${modifiedUrl}" target="_blank">${modifiedUrl}</a><br>
+                                    <button id="copyFeedButton" class="swal2-confirm swal2-styled" style="background-color: orange; color: white; border: none; width: 150px; padding: 7px 1px; border-radius: 5px;">
+                                        <i class="fas fa-rss" style="margin-right: 5px; color: white;"></i> نسخ الرابط
+                                    </button>
+                                `,
+                                didOpen: () => {
+                                    const copyButton = document.getElementById('copyFeedButton');
+                                    copyButton.addEventListener('click', () => {
+                                        navigator.clipboard.writeText(modifiedUrl).then(() => {
+                                            Swal.fire({
+                                                icon: 'success',
+                                                title: 'تم النسخ!',
+                                                text: 'تم نسخ رابط الخلاصة إلى الحافظة.'
+                                            });
+                                        }).catch(err => {
+                                            showError('حدث خطأ أثناء النسخ: ' + err.message);
                                         });
-                                    }).catch(err => {
-                                        showError('حدث خطأ أثناء النسخ: ' + err.message);
                                     });
-                                });
-                            }
-                        });
-                    }
-                })
-                .catch(error => {
-                    showError('حدث خطأ: ' + error.message);
-                    button.textContent = 'تحقق';
-                    button.disabled = false;
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        showError('حدث خطأ: ' + error.message);
+                        button.textContent = 'تحقق';
+                        button.disabled = false;
+                    });
+            }
+
+            // دالة لعرض رسالة الخطأ
+            function showError(message) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: message
                 });
-        }
-
-        // دالة لعرض رسالة الخطأ
-        function showError(message) {
-            Swal.fire({
-                icon: 'error',
-                title: 'خطأ',
-                text: message
-            });
-        }
-    });
-
-
-
-
-
+            }
+        });
 
         let lastHeight = window.innerHeight;
 
